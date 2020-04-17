@@ -9,9 +9,17 @@ public class Tour {
     private static int[][] acc_board = new int[8][8];
 
     public static void main(String[] args) {
-        board = new int[8][8];
-        update_acc_board();
-        move_acc();
+        for(int i = 0; i < 8; i++) {
+            for(int j = 0; j < 8; j++) {
+                board = new int[8][8];
+                acc_board = new int[8][8];
+                knight[0] = i;
+                knight[1] = j;
+                update_acc_board();
+                move_acc();
+            }
+        }
+
 //        System.out.print(get_legal_moves());
     }
 
@@ -50,13 +58,18 @@ public class Tour {
     }
 
     private static void move_acc() {
-        board[knight[0]][knight[1]] = counter;
         counter++;
-        print_board();
+        board[knight[0]][knight[1]] = counter;
+        if(counter == 1) print_board();
         update_acc_board();
-        print_acc_board();
+//        print_acc_board();
         ArrayList<Integer> legal = get_legal_moves();
-        if(legal.size() == 0) return;
+        if(legal.size() == 0) {
+            print_board();
+            System.out.println("Moves: " + counter);
+            counter = 0;
+            return;
+        }
         int min = 0;
         for(int i = 0; i < legal.size(); i++) {
             if(acc_board[knight[0] + vertical[legal.get(i)]][knight[1] + horizontal[legal.get(i)]]
