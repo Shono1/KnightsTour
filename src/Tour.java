@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 
+// Feast on my spaghetti
 public class Tour {
     private static int[][] board;
     private static final int[] horizontal = {2, 1, -1, -2, -2, -1, 1, 2};
@@ -7,20 +8,46 @@ public class Tour {
     private static int[] knight = {0, 0};
     private static int counter = 1;
     private static int[][] acc_board = new int[8][8];
+    private static int[] rand_scores = new int[1000];
 
     public static void main(String[] args) {
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                board = new int[8][8];
-                acc_board = new int[8][8];
-                knight[0] = i;
-                knight[1] = j;
-                update_acc_board();
-                move_acc();
-            }
-        }
+//        for(int i = 0; i < 8; i++) {
+//            for(int j = 0; j < 8; j++) {
+//                board = new int[8][8];
+//                acc_board = new int[8][8];
+//                knight[0] = i;
+//                knight[1] = j;
+//                update_acc_board();
+//                move_acc();
+//            }
+//        }
 
 //        System.out.print(get_legal_moves());
+        int num_games = 0;
+        while(true) {
+            board = new int[8][8];
+            brute_force_move();
+            System.out.println(counter);
+            if(counter >= 64) break;
+            counter = 1;
+            num_games++;
+        }
+        System.out.println("FINISHED: " + num_games);
+
+    }
+
+    private static void brute_force_move() {
+        if(!(get_legal_moves().size() > 0)) {
+            System.out.println("Moves: " + counter);
+            //print_board();
+            return;
+        }
+        board[knight[0]][knight[1]] = counter;
+        counter++;
+        ArrayList<Integer> legal = get_legal_moves();
+        int index = (int) (Math.random() * legal.size());
+        move(legal.get(index));
+        brute_force_move();
     }
 
     private static void update_acc_board() {
@@ -71,12 +98,38 @@ public class Tour {
             return;
         }
         int min = 0;
+        ArrayList<Integer> tied = new ArrayList<>();
         for(int i = 0; i < legal.size(); i++) {
             if(acc_board[knight[0] + vertical[legal.get(i)]][knight[1] + horizontal[legal.get(i)]]
-                    < acc_board[knight[0] + vertical[legal.get(min)]][knight[1] + horizontal[legal.get(min)]]) min = i;
+                    < acc_board[knight[0] + vertical[legal.get(min)]][knight[1] + horizontal[legal.get(min)]]) {
+                min = i;
+                tied.clear();
+                tied.add(legal.get(min));
+            }
+            else if (acc_board[knight[0] + vertical[legal.get(i)]][knight[1] + horizontal[legal.get(i)]]
+                    == acc_board[knight[0] + vertical[legal.get(min)]][knight[1] + horizontal[legal.get(min)]]) {
+                tied.add(legal.get(i));
+            }
         }
+        if(tied.size() > 1) min = break_tie(tied);
         move(legal.get(min));
         move_acc();
+    }
+
+    private static int break_tie(ArrayList<Integer> tied) {
+        int[] pos = {knight[0], knight[1]};
+        int min_index = 0;
+        int min_val = 100;
+        for(int i = 0; i < tied.size(); i++) {
+            move(tied.get(i));
+            if(get_legal_moves().size() < min_val) {
+                min_index = i;
+                min_val = get_legal_moves().size();
+            }
+            knight[0] = pos[0];
+            knight[1] = pos[1];
+        }
+        return min_index;
     }
 
     private static ArrayList<Integer> get_legal_moves() {
